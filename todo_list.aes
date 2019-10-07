@@ -1,0 +1,31 @@
+// interface helper for todo list workshop
+// sophia docs: https://github.com/aeternity/protocol/blob/aeternity-node-v4.2.0/contracts/sophia.md
+contract ToDoList =
+
+  record state = {
+    index: int,
+    listOfTasks: map(int, task)}
+  
+  record task = {
+    name: string,
+    completed:bool}
+    
+  stateful entrypoint init() = 
+      { listOfTasks = {},
+        index=0}
+      
+  public stateful entrypoint add_task(name: string) =
+        let task = {
+          name = name,
+          completed = false}
+        put(state{listOfTasks[state.index]=task, index=state.index+1})
+
+
+  // TODO: set existing task of state to completed
+  stateful entrypoint set_task_completed(seq_id : int) =
+    
+    put(state{listOfTasks[seq_id].completed = true})
+
+  // TODO: return all tasks of state in format {name: string, completed: bool}
+  entrypoint get_tasks() : map(int, task) =
+    state.listOfTasks
