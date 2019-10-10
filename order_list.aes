@@ -1,0 +1,45 @@
+contract OrderList =
+    record state = {
+        orderItems : list(item), 
+        orderQty : int, 
+        orderTotal: int}
+    record item = {
+        code : string,
+        name : string,
+        qty : int,
+        price : int}
+    stateful entrypoint init() = {
+        orderItems = [],
+        orderQty = 0,
+        orderTotal = 0}
+        
+    public stateful entrypoint add_new_item(code: string, name: string, qty: int, price: int) =
+        let new_item = {
+            code = code,
+            name = name,
+            qty = qty,
+            price = price}
+        put(state{orderItems = new_item::state.orderItems, orderQty = state.orderQty + 1, orderTotal = state.orderTotal + (new_item.price*new_item.qty)})
+    public entrypoint get_order_total() : int = 
+        state.orderTotal
+    public entrypoint get_order_items() : list(item) = 
+      state.orderItems
+    public stateful entrypoint delete_item(code:string) = 
+        let compare = (x: string, y: string) => 
+            if(x == y)
+              true
+            else
+              false
+              
+        let aux_list : list(item) = map(compare, code, state.orderItems)
+        put(state{orderItems = aux_list})
+        0
+    private stateful function map(f, code, xs) = 
+        switch(xs)
+            [] => []
+            x::xs => 
+                if(!f(code,x.code))
+                    x::map(f,code,xs)
+                else
+                    put(state{orderQty = state.orderQty - 1, orderTotal = state.orderTotal - (x.price * x.qty)})
+                    map(f,code,xs)
